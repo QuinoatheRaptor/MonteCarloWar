@@ -3,6 +3,9 @@
 #include <queue>
 using namespace std;
 
+Player::Player(string name){
+    this->name = name;
+}
 Player::Player(){
     
 }

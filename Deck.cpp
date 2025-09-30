@@ -35,9 +35,9 @@ Deck::Deck(Player& p1, Player& p2){
             fullDeck[counter] = Card(j, i, name);
         }
     }
-    for(int i = 0; i < 52; i++){
-        cout << fullDeck[i].print() + ", ";
-    }
+    // for(int i = 0; i < 52; i++){
+    //     cout << fullDeck[i].print() + ", ";
+    // } Print the deck if necessary
     //Then we shuffle the deck
     srand(time(0));   // seed with current time
     for(int i = 0; i < 52; i++){

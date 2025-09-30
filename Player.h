@@ -8,6 +8,8 @@ using namespace std;
 class Player{
     public:
         queue<Card> deck;
+        string name;
+        Player(string name);
         Player();
         void setDeck(queue<Card> d);
 };
