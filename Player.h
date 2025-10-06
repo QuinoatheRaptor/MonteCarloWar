@@ -9,6 +9,7 @@ class Player{
     public:
         queue<Card> deck;
         string name;
+        int bet;
         Player(string name);
         Player();
         void setDeck(queue<Card> d);
