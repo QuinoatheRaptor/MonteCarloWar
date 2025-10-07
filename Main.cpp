@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <queue>
+#include <limits>
 #include "Deck.h"
 #include "Player.h"
 using namespace std;
@@ -15,7 +16,7 @@ int verifyBets(Player& bettor, Player& other){
   do{
     cout << bettor.name + ", you must raise until you match or surpass " + other.name + "'s bet or enter 0 to fold. Your current bet is " + to_string(bettor.bet) + ". How much do you want to raise your bet by? ";
     cin >> raise;
-    while(bettor.bet + raise > bettor.deck.size() || bettor.bet + raise > other.deck.size()){
+    while(bettor.bet + raise > bettor.deck.size() - 1 || bettor.bet + raise > other.deck.size() - 1){
       cout << "Your bet has exceeded a player's deck size. Please enter a lower bet: ";
       cin >> raise;
     }
@@ -31,8 +32,8 @@ int getBets(Player& lowerSuit, Player& higherSuit){
   int raise;
   cout << lowerSuit.name + ", enter your bet: ";
   cin >> raise;
-  while(raise <= 0 || raise > lowerSuit.deck.size() || raise > higherSuit.deck.size()){
-    cout << "Your bet must be greater than 0 and cannot exceed a player's deck. Enter a new bet: ";
+  while(raise <= 0 || raise > lowerSuit.deck.size() - 1 || raise > higherSuit.deck.size() - 1){
+    cout << "Your bet must be greater than 0 and cannot empty a player's deck (one card must remain to settle the war). Enter a new bet: ";
     cin >> raise;
   }
   lowerSuit.bet += raise;
@@ -83,7 +84,7 @@ RoundResult compareCards(Player& p1, Player& p2, bool war){
     result.loser = (p2.deck.empty()) ? &p2 : &p1;
     cout << result.loser->name + " doesn't have enough cards to play the war. Therefore they automatically lose the game.\n";
     result.winner->deck.push(p1Card);
-    result.winner->deck.push(p2Card);
+    result.winner->deck.push(p2Card);//order is irrelevant bc the game is over
   }
   else{
     cout << "We have a war!\n";
@@ -97,15 +98,21 @@ RoundResult compareCards(Player& p1, Player& p2, bool war){
     if(bet < 0 && p1.bet < p2.bet){
       result.winner = &p2;
       result.loser = &p1;
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');//fixing bug where code jumped to next round after somebody folded
     }
     else if(bet < 0){
       result.winner = &p1;
       result.loser = &p2;
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');//fixing bug where code jumped to next round after somebody folded
       //cin.get();
     }
     else{
       result = compareCards(p1, p2, true);
       //cin.get();
+    }
+    for(int i = 0; i < result.winner->bet; i++){
+      result.winner->deck.push(result.winner->deck.front());
+      result.winner->deck.pop();
     }
     for(int i = 0; i < result.loser->bet; i++){
       result.winner->deck.push(result.loser->deck.front());
@@ -123,6 +130,13 @@ RoundResult compareCards(Player& p1, Player& p2, bool war){
 
 int main() {
   cout << "Welcome to Monte Carlo War!\n";
+  cout << "This is a card game very similar to the classic card game War with one major difference. During a war, both players place a bet of cards. Whoever wins the war (played with the next card off the deck, before drawing your bet) takes the other player's bet. Players also have the option to fold to avoid losing more cards. If a player folds they lose automatically and their top card that would decide the war is returned to the top of their deck.\n\n";
+  cout << "One strategy can be counting cards to figure out your chances at winning a war. To aid you in this end, it's helpful to know that cards are returned to the deck in the following order:\n";
+  cout << "1. The cards that decide the war, with the higher card being returned first (this is also true of a round without a war)\n";
+  cout << "2. The winning player's bet\n";
+  cout << "3. The losing player's bet\n";
+  cout << "4. The two equal cards that initiated the war\n\n";
+  cout << "That's all you need to know. Let's begin!\n";
   string name;
   cout << "Player 1 enter your name: ";
   cin >> name;
@@ -133,6 +147,7 @@ int main() {
   Deck deck(p1, p2);
 
   //The actual gameplay code
+  int roundCount = 1;
   while(!p1.deck.empty() && !p2.deck.empty()){
     compareCards(p1, p2, false);
   }
