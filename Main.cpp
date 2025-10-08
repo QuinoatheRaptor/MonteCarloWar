@@ -79,7 +79,7 @@ RoundResult compareCards(Player& p1, Player& p2, bool war){
     result.winner = &p2;
     result.loser = &p1;
   }
-  else if(p1.deck.size() == 0 || p2.deck.size() == 0){//the very niche situation where a player's last card is a war. In this case, they immediately lose
+  else if(p1.deck.size() <= 1 || p2.deck.size() <= 1){//the very niche situation where a player's last or second to last card is a war. In this case, they immediately lose due to an inability to make a bet and resolve the war
     result.winner = (p1.deck.empty()) ? &p2 : &p1;
     result.loser = (p2.deck.empty()) ? &p2 : &p1;
     cout << result.loser->name + " doesn't have enough cards to play the war. Therefore they automatically lose the game.\n";
